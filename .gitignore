@@ -1,3 +1,10 @@
 *.o
 fftw_test
+comsim
 *~
+*.swp
+*.pgm
+*.dat
+*.png
+*.gp
+*.m
