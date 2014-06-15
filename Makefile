@@ -10,7 +10,7 @@ fftw_test: fftw_test.o
 		$(CC) $(CFLAGS) -o $@ $< $(LIBS)
 
 %.o: %.c
-		$(CC) $(CFLAGS) -o $@ $<
+		$(CC) $(CFLAGS) -o $@ $< $(LIBS)
 
 clean:
 		-rm *.o
