@@ -1,4 +1,5 @@
 close all; clear; clc
+Ts = 0.0001;
 
 % 载波
 c1 = load('f1.dat');
@@ -8,7 +9,7 @@ plot(c1(:,1), c1(:,2), 'r')
 hold on
 plot(c2(:,1), c2(:,2), 'b')
 hold off
-axis([0, 0.001, -5, 5])
+axis([0, Ts, -5, 5])
 xlabel('Time')
 ylabel('Magnitude')
 title('Carrier')
