@@ -1,5 +1,6 @@
 *.o
 fftw_test
+logfile
 comsim
 *~
 *.swp
@@ -7,5 +8,5 @@ comsim
 *.dat
 *.png
 *.gp
-*.m
 *.sh
+*.jpeg
