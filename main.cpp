@@ -11,7 +11,6 @@
 #include "main.h"
 
 //#define  DEBUG
-//#define  TS         0.001
 #define  TS         0.0001
 // 采样频率
 #define  TDELTA     0.000001 
@@ -21,9 +20,10 @@
 #define  PI         3.1415926535897932
 
 double freq_one[NTMINT], freq_zero[NTMINT];
-double amp = 5, deviation = 1;
-int pixel_cnt;
+int amp = 1, deviation = 3;
 bool start_up = true;
+double npixel, nerror;
+uchar txPixel;
 
 using namespace std;
 using namespace cv;
@@ -33,6 +33,7 @@ static void signal_channel(double *txData[]);
 static uchar demodulate(const double *txData[]);
 static void filter(const double *in, const double *filt, double *outp);
 static double gaussrand(void);
+void reset_err_pro(int, void*);
 
 int main(void)
 {
@@ -45,6 +46,8 @@ int main(void)
         return 1;
     }
     namedWindow("Original image", WINDOW_NORMAL);
+    createTrackbar("Amplitude", "Original image", &amp, 5, reset_err_pro);
+    createTrackbar("Deviation", "Original image", &deviation, 10, reset_err_pro);
     namedWindow("Image received", WINDOW_NORMAL);
     imshow("Original image", src);
 //    imshow("image Received", dst);
@@ -55,17 +58,16 @@ int main(void)
 //    Mat dst = src.clone();
 
     double *txData[8];
+    int pixel_cnt = 0;
     for (int i = 0; i < 8; ++i)
         txData[i] = (double *)fftw_malloc(sizeof(double) * NTMINT);
-    srand(time(NULL));
-    while (waitKey(1000) < 0) {
     for (int i = 0; i < NTMINT; ++i) {
         freq_one[i] = amp*cos(2*PI*F1*i*TDELTA);
         freq_zero[i] = amp*cos(2*PI*F2*i*TDELTA);
     }
 #ifdef DEBUG
-    ofstream ff1("f1.dat");
-    ofstream ff2("f2.dat");
+    ofstream ff1("data/f1.dat");
+    ofstream ff2("data/f2.dat");
     for (int i = 0; i < NTMINT; ++i) {
         ff1 << i*TS/NTMINT << " " << freq_one[i] << endl;
         ff2 << i*TS/NTMINT << " " << freq_zero[i] << endl;
@@ -74,12 +76,16 @@ int main(void)
     ff2.close();
 #endif
 
+    srand(time(NULL));
+//    while (waitKey(100) < 0) {
+    while (amp && waitKey(1) < 0) {
     for (int r = 0; r < src.rows; ++r) {
         for (int c = 0; c < src.cols; ++c) {
 
+            txPixel = src.at<uchar>(r, c);
             modulate(src.at<uchar>(r, c), txData);
 #ifdef DEBUG
-            ofstream ftx("tx.dat");
+            ofstream ftx("data/tx.dat");
             for (int i = 0; i < 8; ++i) {
                 for (int j = 0; j < NTMINT; ++j)
                     ftx << i*TS+j*TS/NTMINT << " " << txData[i][j] << endl;
@@ -89,7 +95,7 @@ int main(void)
 
             signal_channel(txData);
 #ifdef DEBUG
-            ofstream ftx_pn("tx_pn.dat");
+            ofstream ftx_pn("data/tx_pn.dat");
             for (int i = 0; i < 8; ++i) {
                 for (int j = 0; j < NTMINT; ++j)
                     ftx_pn << i*TS+j*TS/NTMINT << " " << txData[i][j] << endl;
@@ -108,13 +114,14 @@ int main(void)
             if (pixel_cnt == src.rows * src.cols) {
                 pixel_cnt = 0;
                 imshow("Image received", dst);
+                cout << nerror / npixel << endl;
 //                cout << endl << endl;
 //                cout << "src:" << endl << src << endl << endl;
 //                cout << "dst:" << endl << dst << endl << endl;
 //                waitKey(0);
             }
 #ifdef DEBUG
-//            if (pixel_cnt == 1)
+            if (pixel_cnt == 1)
             getchar();
 #endif
         }
@@ -173,16 +180,19 @@ static uchar demodulate(const double *txData[])
 //        if (c1[i][500] > c2[i][500])
         if (c1[i][NTMINT/2] > c2[i][NTMINT/2])
             pixel |= 1 << i;
+        if (pixel&(1<<i) ^ (txPixel&(1<<i)))
+            nerror = nerror + 1;
+        npixel = npixel + 1;
     }
 
 #ifdef DEBUG
-    ofstream fch_outp1("ch_outp1.dat");
+    ofstream fch_outp1("data/ch_outp1.dat");
     for (int i = 0; i < 8; ++i) {
         for (int j = 0; j < NTMINT; ++j)
             fch_outp1 << i*TS+j*TS/NTMINT << " " << c1[i][j] << endl;
     }
     fch_outp1.close();
-    ofstream fch_outp2("ch_outp2.dat");
+    ofstream fch_outp2("data/ch_outp2.dat");
     for (int i = 0; i < 8; ++i) {
         for (int j = 0; j < NTMINT; ++j)
             fch_outp2 << i*TS+j*TS/NTMINT << " " << c2[i][j] << endl;
@@ -246,4 +256,10 @@ static double gaussrand(void)
     phase = 1 - phase;
 
     return X * deviation;
+}
+
+void reset_err_pro(int, void *)
+{
+    npixel = 0;
+    nerror = 0;
 }

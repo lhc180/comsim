@@ -1,6 +1,7 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
+/* f0 = 10kHz, BW_3dB = 2kHz */
 const double bpf1[] = {
     4.3183867e-04,
     8.5716312e-04,
@@ -1004,6 +1005,7 @@ const double bpf1[] = {
     -1.1702457e-03
 };
 
+/* f0 = 40kHz, BW_3dB = 2kHz */
 const double bpf2[] = {
     4.2557964e-04,
     8.2015320e-04,

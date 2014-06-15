@@ -1,5 +1,6 @@
 *.o
 fftw_test
+fftw_test.cpp
 logfile
 comsim
 *~
@@ -10,3 +11,4 @@ comsim
 *.gp
 *.sh
 *.jpeg
+*.ogv
