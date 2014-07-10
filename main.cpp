@@ -10,17 +10,18 @@
 #include <cstdio>
 #include "main.h"
 
-//#define  DEBUG
-#define  TS         0.0001
+#define  DEBUG
+#define  TS         0.001
 // 采样频率
 #define  TDELTA     0.000001 
 #define  NTMINT     ((int)(TS / TDELTA))
 #define  F1         10000
 #define  F2         40000
 #define  PI         3.1415926535897932
+#define  FILE_MODE  ofstream::app
 
 double freq_one[NTMINT], freq_zero[NTMINT];
-int amp = 1, deviation = 3;
+int amp = 5, deviation = 0;
 bool start_up = true;
 double npixel, nerror;
 uchar txPixel;
@@ -38,8 +39,8 @@ void reset_err_pro(int, void*);
 int main(void)
 {
 //#if 0
-    Mat src = imread("chessboard.png", CV_LOAD_IMAGE_GRAYSCALE);
-//    Mat src = imread("dog.jpeg", CV_LOAD_IMAGE_GRAYSCALE);
+//    Mat src = imread("chessboard.png", CV_LOAD_IMAGE_GRAYSCALE);
+    Mat src = imread("rand.png", CV_LOAD_IMAGE_GRAYSCALE);
     Mat dst = src.clone();
     if (!src.data) {
         cerr << "Could not open or find the image" << endl;
@@ -85,7 +86,7 @@ int main(void)
             txPixel = src.at<uchar>(r, c);
             modulate(src.at<uchar>(r, c), txData);
 #ifdef DEBUG
-            ofstream ftx("data/tx.dat");
+            ofstream ftx("data/tx.dat", FILE_MODE);
             for (int i = 0; i < 8; ++i) {
                 for (int j = 0; j < NTMINT; ++j)
                     ftx << i*TS+j*TS/NTMINT << " " << txData[i][j] << endl;

@@ -1,5 +1,5 @@
 close all; clear; clc
-Ts = 0.0001;
+Ts = 0.001;
 
 % 载波
 c1 = load('data/f1.dat');
